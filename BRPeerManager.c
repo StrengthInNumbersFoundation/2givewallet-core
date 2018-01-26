@@ -135,6 +135,7 @@ static const char *dns_seeds[] = {
     "seed.breadwallet.com.", "seed.bitcoin.sipa.be.", "dnsseed.bluematt.me.", "dnsseed.bitcoin.dashjr.org.",
     "seed.bitcoinstats.com.", "bitseed.xf2.org.", "seed.bitcoin.jonasschnelli.ch."
 	*/
+	"localhost",
 	"hackintosh.x.thebarn.com", "c20.x.thebarn.com"
 };
 
