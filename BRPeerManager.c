@@ -64,6 +64,10 @@ static const char *dns_seeds[] = {
 // blockchain checkpoints - these are also used as starting points for partial chain downloads, so they need to be at
 // difficulty transition boundaries in order to verify the block difficulty at the immediately following transition
 static const struct { uint32_t height; const char *hash; uint32_t timestamp; uint32_t target; } checkpoint_array[] = {
+	{0, "0x00000a055a8a21ab15d2c24bf5769100e7e3d3e4134fb8a6a7e879f13a91c974", 1460931698, 0x1e0fffff},
+	{2, "0x00000a30710ef17b5db6ef891423341c526283a9021572420c578f69b50cb6ff", 1461012027, 0x1e0fffff },
+  /* {76800, "0x58cbad0e44312df8f00cd543256a2a9aac62cfd6c9fa5e71db8f11ef7633af60", 1516874178, 0x1e0fffff }, */
+	/*
     { 0, "12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2", 1317972665, 0x1e0ffff0 },
     { 20160, "633036c8df655531c2449b2d09b264cc0b49d945a89be23fd3c1a97361ca198c", 1319798300, 0x1d055262 },
     { 40320, "d148cdd2cf44069cef4b63f0feaf30a8d291ca9ea9ba7e83f226b9738c1d5e9c", 1322522019, 0x1d018053 },
@@ -123,14 +127,15 @@ static const struct { uint32_t height; const char *hash; uint32_t timestamp; uin
     { 1001952, "eccbede26ac99ea996377972d5bd05b9306bcc6ac1f4071f1587e3094a704dff", 1464900396, 0x1b01a29e },
     { 1058400, "76ce37c66d449a4ffbfc35674cf932da701066a001dc223754f9250dd2bdbc62", 1473296285, 0x1b013ca7 },
     { 1260000, "85a22b528d805bf7a641d1d7c6d96ef5054beda3dcab6be7b83f2e3df24b33a8", 1502976600, 0x1a25a0d3 }
+	*/
 };
 
 static const char *dns_seeds[] = {
-    "dnsseed.litecointools.com.",
-    "dnsseed.litecoinpool.org.",
-    "seed-a.litecoin.loshan.co.uk.",
-    "dnsseed.thrasher.io.",
-    "dnsseed.koin-project.com."
+	/*
+    "seed.breadwallet.com.", "seed.bitcoin.sipa.be.", "dnsseed.bluematt.me.", "dnsseed.bitcoin.dashjr.org.",
+    "seed.bitcoinstats.com.", "bitseed.xf2.org.", "seed.bitcoin.jonasschnelli.ch."
+	*/
+	"hackintosh.x.thebarn.com", "c20.x.thebarn.com"
 };
 
 #endif
