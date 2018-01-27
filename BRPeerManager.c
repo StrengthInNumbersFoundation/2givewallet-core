@@ -1385,7 +1385,7 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
         b = manager->lastBlock;
         while (b && b->height > block->height) b = BRSetGet(manager->blocks, &b->prevBlock); // is block in main chain?
 
-        if (BRMerkleBlockEq(b, block)) { // if it's not on a fork, set block heights for its transactions
+        if (b && BRMerkleBlockEq(b, block)) { // if it's not on a fork, set block heights for its transactions
             if (txCount > 0) _BRPeerManagerUpdateTx(manager, txHashes, txCount, block->height, txTime);
             if (block->height == manager->lastBlock->height) manager->lastBlock = block;
         }
