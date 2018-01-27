@@ -271,19 +271,20 @@ int BRMerkleBlockIsValid(const BRMerkleBlock *block, uint32_t currentTime)
     // check if merkle root is correct
     if (block->totalTx > 0 && ! UInt256Eq(merkleRoot, block->merkleRoot)) {
         r = 0;
-        loaf_log("invalid merkleRoot: %s - %s", u256_hex_encode(merkleRoot), u256_hex_encode(block->merkleRoot));
+        loaf_log("invalid merkleRoot: %s - %s\n", u256_hex_encode(merkleRoot), u256_hex_encode(block->merkleRoot));
     }
     
     // check if timestamp is too far in future
     if (block->timestamp > currentTime + BLOCK_MAX_TIME_DRIFT) {
         r = 0;
-        loaf_log("timestamp too far in future for block (%s, height = %d): %d - %d", u256_hex_encode(block->blockHash), block->height, block->timestamp, (currentTime + BLOCK_MAX_TIME_DRIFT));
+        loaf_log("timestamp too far in future for block (%s, height = %d): %d - %d\n",
+		 u256_hex_encode(block->blockHash), block->height, block->timestamp, (currentTime + BLOCK_MAX_TIME_DRIFT));
     }
     
     // check if proof-of-work target is out of range
     if (target == 0 || target & 0x00800000 || size > maxsize || (size == maxsize && target > maxtarget)) {
         r = 0;
-        loaf_log("target is out of range: %x - %x - %x - %x", target, maxtarget, size, maxsize);
+        loaf_log("target is out of range: %x - %x - %x - %x\n", target, maxtarget, size, maxsize);
     }
     
     if (size > 3) UInt32SetLE(&t.u8[size - 3], target);
@@ -292,8 +293,17 @@ int BRMerkleBlockIsValid(const BRMerkleBlock *block, uint32_t currentTime)
     for (int i = sizeof(t) - 1; r && i >= 0; i--) { // check proof-of-work
         if (block->powHash.u8[i] < t.u8[i]) break;
         if (block->powHash.u8[i] > t.u8[i]) {
-            r = 0;
-            loaf_log("invalid pow[%d]: %x - %x", i, block->powHash.u8[i], t.u8[i]);
+		//r = 0;
+            loaf_log("invalid pow[%d]: %x - %x\n\t"
+		     "invalid merkleRoot: %s - %s\n\tt %s hash %s pow %s\n",
+		     i, block->powHash.u8[i], t.u8[i],
+		     u256_hex_encode(UInt256Reverse(merkleRoot)),
+		     u256_hex_encode(UInt256Reverse(block->merkleRoot)),
+		     u256_hex_encode(UInt256Reverse(t)),
+		     u256_hex_encode(UInt256Reverse(block->blockHash)),
+		     u256_hex_encode(UInt256Reverse(block->powHash))
+		    );
+	    break;
         }
     }
     
