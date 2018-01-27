@@ -469,9 +469,18 @@ static int _BRPeerAcceptHeadersMessage(BRPeer *peer, const uint8_t *msg, size_t 
             size_t last = 0;
             time_t now = time(NULL);
             UInt256 locators[2];
-            
+
+#if 0
             BRSHA256_2(&locators[0], &msg[off + 81*(count - 1)], 80);
             BRSHA256_2(&locators[1], &msg[off], 80);
+#endif
+	    BRScrypt(&locators[0], sizeof(locators[0]), &msg[off + 82*(count - 1)], 80, &msg[off + 82*(count - 1)], 80, 1024, 1, 1);
+	    BRScrypt(&locators[1], sizeof(locators[1]), &msg[off], 80, &msg[off], 80, 1024, 1, 1);
+#if 0
+	    peer_log(peer, "XXX locator 0 %s 1 %s\n",
+		     u256_hex_encode(UInt256Reverse(UInt256Get(&locators[0]))),
+		     u256_hex_encode(UInt256Reverse(UInt256Get(&locators[1]))));
+#endif
 
             if (timestamp > 0 && timestamp + 7*24*60*60 + BLOCK_MAX_TIME_DRIFT >= ctx->earliestKeyTime) {
                 // request blocks for the remainder of the chain
@@ -481,14 +490,20 @@ static int _BRPeerAcceptHeadersMessage(BRPeer *peer, const uint8_t *msg, size_t 
                     timestamp = (++last < count) ? UInt32GetLE(&msg[off + 81*last + 68]) : 0;
                 }
                 
-                BRSHA256_2(&locators[0], &msg[off + 81*(last - 1)], 80);
+                //BRSHA256_2(&locators[0], &msg[off + 81*(last - 1)], 80);
+		BRScrypt(&locators[0], sizeof(locators[0]), &msg[off + 82*(last - 1)], 80, &msg[off + 82*(last - 1)], 80, 1024, 1, 1);
                 BRPeerSendGetblocks(peer, locators, 2, UINT256_ZERO);
             }
             else BRPeerSendGetheaders(peer, locators, 2, UINT256_ZERO);
 
             for (size_t i = 0; r && i < count; i++) {
-                BRMerkleBlock *block = BRMerkleBlockParse(&msg[off + 81*i], 81);
-                
+                BRMerkleBlock *block = BRMerkleBlockParse(&msg[off + 82*i], 82);
+
+#if 0
+		peer_log(peer, "XXX block header: i %lu %s", i,
+			 u256_hex_encode(UInt256Reverse(block->blockHash)));
+#endif
+		
                 if (! BRMerkleBlockIsValid(block, (uint32_t)now)) {
 		    peer_log(peer, "invalid block header: i %lu %s", i,
 			     u256_hex_encode(UInt256Reverse(block->blockHash)));
