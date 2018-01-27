@@ -490,7 +490,8 @@ static int _BRPeerAcceptHeadersMessage(BRPeer *peer, const uint8_t *msg, size_t 
                 BRMerkleBlock *block = BRMerkleBlockParse(&msg[off + 81*i], 81);
                 
                 if (! BRMerkleBlockIsValid(block, (uint32_t)now)) {
-                    peer_log(peer, "invalid block header: %s", u256_hex_encode(block->blockHash));
+		    peer_log(peer, "invalid block header: i %lu %s", i,
+			     u256_hex_encode(UInt256Reverse(block->blockHash)));
                     BRMerkleBlockFree(block);
                     r = 0;
                 }
@@ -1413,7 +1414,6 @@ void BRPeerSendGetheaders(BRPeer *peer, const UInt256 locators[], size_t locator
                  u256_hex_encode(UInt256Reverse(locators[0])), (locatorsCount > 2 ? " ...," : ""),
                  (locatorsCount > 1 ? u256_hex_encode(UInt256Reverse(locators[locatorsCount - 1])) : ""));
 	peer_log(peer, "rev %s\n", u256_hex_encode(UInt256Reverse(locators[0])));
-	peer_log(peer, "normal %s\n", u256_hex_encode(locators[0]));
 		 
         BRPeerSendMessage(peer, msg, off, MSG_GETHEADERS);
     }

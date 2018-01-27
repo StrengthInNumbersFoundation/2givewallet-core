@@ -271,25 +271,28 @@ int BRMerkleBlockIsValid(const BRMerkleBlock *block, uint32_t currentTime)
     // check if merkle root is correct
     if (block->totalTx > 0 && ! UInt256Eq(merkleRoot, block->merkleRoot)) {
         r = 0;
-        loaf_log("invalid merkleRoot: %s - %s\n", u256_hex_encode(merkleRoot), u256_hex_encode(block->merkleRoot));
+        loaf_log("invalid merkleRoot: %s - %s\n", u256_hex_encode((UInt256Reverse(merkleRoot))), u256_hex_encode((UInt256Reverse(block->merkleRoot))));
+        goto out;
     }
     
     // check if timestamp is too far in future
     if (block->timestamp > currentTime + BLOCK_MAX_TIME_DRIFT) {
         r = 0;
         loaf_log("timestamp too far in future for block (%s, height = %d): %d - %d\n",
-		 u256_hex_encode(block->blockHash), block->height, block->timestamp, (currentTime + BLOCK_MAX_TIME_DRIFT));
+		 u256_hex_encode(UInt256Reverse(block->blockHash)), block->height, block->timestamp, (currentTime + BLOCK_MAX_TIME_DRIFT));
+        goto out;
     }
-    
+
     // check if proof-of-work target is out of range
     if (target == 0 || target & 0x00800000 || size > maxsize || (size == maxsize && target > maxtarget)) {
-        r = 0;
         loaf_log("target is out of range: %x - %x - %x - %x\n", target, maxtarget, size, maxsize);
+        r = 0;
+        goto out;
     }
     
     if (size > 3) UInt32SetLE(&t.u8[size - 3], target);
     else UInt32SetLE(t.u8, target >> (3 - size)*8);
-    
+
     for (int i = sizeof(t) - 1; r && i >= 0; i--) { // check proof-of-work
         if (block->powHash.u8[i] < t.u8[i]) break;
         if (block->powHash.u8[i] > t.u8[i]) {
@@ -306,7 +309,8 @@ int BRMerkleBlockIsValid(const BRMerkleBlock *block, uint32_t currentTime)
 	    break;
         }
     }
-    
+
+out:
     return r;
 }
 
@@ -339,13 +343,21 @@ int BRMerkleBlockContainsTxHash(const BRMerkleBlock *block, UInt256 txHash)
 int BRMerkleBlockVerifyDifficulty(const BRMerkleBlock *block, const BRMerkleBlock *previous, uint32_t transitionTime)
 {
     int r = 1;
-    
+
     assert(block != NULL);
     assert(previous != NULL);
-    
-    if (! previous || !UInt256Eq(block->prevBlock, previous->blockHash) || block->height != previous->height + 1) r = 0;
-    if (r && (block->height % BLOCK_DIFFICULTY_INTERVAL) == 0 && transitionTime == 0) r = 0;
-    
+
+    if (! previous || !UInt256Eq(block->prevBlock, previous->blockHash) || block->height != previous->height + 1) {
+	    //r = 0;
+	    printf("%s:%d BAD\n", __func__, __LINE__);
+	    goto out;
+    }
+    if (r && (block->height % BLOCK_DIFFICULTY_INTERVAL) == 0 && transitionTime == 0) {
+	    //r = 0;
+	    printf("%s:%d BAD\n", __func__, __LINE__);
+	    goto out;
+    }
+
 #if BITCOIN_TESTNET
     // TODO: implement testnet difficulty rule check
     return r; // don't worry about difficulty on testnet for now
@@ -378,9 +390,9 @@ int BRMerkleBlockVerifyDifficulty(const BRMerkleBlock *block, const BRMerkleBloc
         if (block->target != ((uint32_t)target | size << 24)) r = 0;
     }
     else if (r && block->target != previous->target) r = 0;
-
 #endif
-    
+
+out:
     return r;
 }
 

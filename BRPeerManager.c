@@ -1217,8 +1217,9 @@ static int _BRPeerManagerVerifyBlock(BRPeerManager *manager, BRMerkleBlock *bloc
 
         if (! b) {
             peer_log(peer, "missing previous difficulty tansition time, can't verify blockHash: %s",
-                     u256_hex_encode(block->blockHash));
-            r = 0;
+                     u256_hex_encode(UInt256Reverse(block->blockHash)));
+	//   r = 0;
+	//   goto out;
         }
         else {
             transitionTime = b->timestamp;
@@ -1239,8 +1240,9 @@ static int _BRPeerManagerVerifyBlock(BRPeerManager *manager, BRMerkleBlock *bloc
     // verify block difficulty
     if (r && ! BRMerkleBlockVerifyDifficulty(block, prev, transitionTime)) {
         peer_log(peer, "relayed block with invalid difficulty target %x, blockHash: %s", block->target,
-                 u256_hex_encode(block->blockHash));
+                 u256_hex_encode(UInt256Reverse(block->blockHash)));
         r = 0;
+	goto out;
     }
 
     if (r) {
@@ -1254,7 +1256,8 @@ static int _BRPeerManagerVerifyBlock(BRPeerManager *manager, BRMerkleBlock *bloc
             r = 0;
         }
     }
-
+    
+out:
     return r;
 }
 
@@ -1320,9 +1323,11 @@ static void _peerRelayedBlock(void *info, BRMerkleBlock *block)
         }
     }
     else if (! prev) { // block is an orphan
+#if 0
         peer_log(peer, "relayed orphan block %s\n\tprevious %s\n\tlast block is %s, height %"PRIu32,
                  u256_hex_encode(UInt256Reverse(block->blockHash)), u256_hex_encode(UInt256Reverse(block->prevBlock)),
 		 u256_hex_encode(UInt256Reverse(manager->lastBlock->blockHash)), manager->lastBlock->height);
+#endif
 
         if (block->timestamp + 7*24*60*60 < time(NULL)) { // ignore orphans older than one week ago
             BRMerkleBlockFree(block);
