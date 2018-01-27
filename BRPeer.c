@@ -200,12 +200,16 @@ static int _BRPeerAcceptVersionMessage(BRPeer *peer, const uint8_t *msg, size_t 
         off += sizeof(UInt128);
         recvPort = UInt16GetBE(&msg[off]);
         off += sizeof(uint16_t);
+	
+        peer->timestamp = UInt64GetLE(&msg[off]);
+        off += sizeof(uint64_t);
         fromServices = UInt64GetLE(&msg[off]);
         off += sizeof(uint64_t);
         fromAddr = UInt128Get(&msg[off]);
         off += sizeof(UInt128);
         fromPort = UInt16GetBE(&msg[off]);
         off += sizeof(uint16_t);
+        
         nonce = UInt64GetLE(&msg[off]);
         off += sizeof(uint64_t);
         strLen = (size_t)BRVarInt(&msg[off], (off <= msgLen ? msgLen - off : 0), &len);
@@ -1300,7 +1304,7 @@ void BRPeerSendVersionMessage(BRPeer *peer)
 {
     BRPeerContext *ctx = (BRPeerContext *)peer;
     size_t off = 0, userAgentLen = strlen(USER_AGENT);
-    uint8_t msg[80 + BRVarIntSize(userAgentLen) + userAgentLen + 5];
+    uint8_t msg[88 + BRVarIntSize(userAgentLen) + userAgentLen + 5];
     
     UInt32SetLE(&msg[off], PROTOCOL_VERSION); // version
     off += sizeof(uint32_t);
@@ -1308,12 +1312,17 @@ void BRPeerSendVersionMessage(BRPeer *peer)
     off += sizeof(uint64_t);
     UInt64SetLE(&msg[off], time(NULL)); // timestamp
     off += sizeof(uint64_t);
+    
     UInt64SetLE(&msg[off], peer->services); // services of remote peer
     off += sizeof(uint64_t);
     UInt128Set(&msg[off], peer->address); // IPv6 address of remote peer
     off += sizeof(UInt128);
     UInt16SetBE(&msg[off], peer->port); // port of remote peer
     off += sizeof(uint16_t);
+
+    UInt64SetLE(&msg[off], time(NULL)); // timestamp
+    off += sizeof(uint64_t);
+    
     UInt64SetLE(&msg[off], ENABLED_SERVICES); // services
     off += sizeof(uint64_t);
     UInt128Set(&msg[off], LOCAL_HOST); // IPv4 mapped IPv6 header
