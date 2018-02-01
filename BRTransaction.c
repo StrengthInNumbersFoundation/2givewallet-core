@@ -351,7 +351,7 @@ BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
     tx->version = (off + sizeof(uint32_t) <= bufLen) ? UInt32GetLE(&buf[off]) : 0;
     off += sizeof(uint32_t);
 
-    /* Peercoin messed with transcation protocol, walk past the the 32bit ntime field */
+    /* Peercoin messed with transaction protocol, walk past the the 32bit ntime field */
     off += sizeof(uint32_t);
 
     tx->inCount = (size_t)BRVarInt(&buf[off], (off <= bufLen ? bufLen - off : 0), &len);
