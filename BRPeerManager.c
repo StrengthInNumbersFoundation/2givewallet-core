@@ -304,6 +304,8 @@ static void _BRPeerManagerSyncStopped(BRPeerManager *manager)
 {
     manager->syncStartHeight = 0;
 
+    printf("%s downloadPeer %d\n", __func__, manager->downloadPeer);
+
     if (manager->downloadPeer) {
         // don't cancel timeout if there's a pending tx publish callback
         for (size_t i = array_count(manager->publishedTx); i > 0; i--) {
@@ -670,7 +672,7 @@ static void _mempoolDone(void *info, int success)
         peer_log(peer, "mempool request finished");
         pthread_mutex_lock(&manager->lock);
         if (manager->syncStartHeight > 0) {
-            peer_log(peer, "sync succeeded");
+            peer_log(peer, "sync succeeded height %d", manager->syncStartHeight);
             syncFinished = 1;
             _BRPeerManagerSyncStopped(manager);
         }
@@ -1869,6 +1871,8 @@ void BRPeerManagerRescan(BRPeerManager *manager)
         BRPeerManagerConnect(manager);
     }
     else pthread_mutex_unlock(&manager->lock);
+
+    printf("%s\n", __func__);
 }
 
 // the (unverified) best block height reported by connected peers
