@@ -42,7 +42,7 @@ extern "C" {
 #define BITCOIN_PUBKEY_ADDRESS      39
 #define BITCOIN_SCRIPT_ADDRESS      8
 #define BITCOIN_PUBKEY_ADDRESS_TEST 113
-#define BITCOIN_SCRIPT_ADDRESS_TEST 96
+#define BITCOIN_SCRIPT_ADDRESS_TEST 196
 
 // bitcoin script opcodes: https://en.bitcoin.it/wiki/Script#Constants
 #define OP_0           0x00
