@@ -101,6 +101,7 @@ BRTransaction *BRTransactionNew(void);
 // buf must contain a serialized tx
 // retruns a transaction that must be freed by calling BRTransactionFree()
 BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen);
+BRTransaction *BRTransactionParseFlags(const uint8_t *buf, size_t bufLen, uint32_t flags);
 
 // returns number of bytes written to buf, or total bufLen needed if buf is NULL
 // (tx->blockHeight and tx->timestamp are not serialized)

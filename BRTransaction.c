@@ -262,6 +262,10 @@ static size_t _BRTransactionData(const BRTransaction *tx, uint8_t *data, size_t 
     if (anyoneCanPay && index >= tx->inCount) return 0;
     if (data && off + sizeof(uint32_t) <= dataLen) UInt32SetLE(&data[off], tx->version); // tx version
     off += sizeof(uint32_t);
+
+    // Add emtpy timestamp since peercoin messed with the protocol without versioning it.
+    //UInt32SetLE(&data[off], 0);
+    off += sizeof(uint32_t);
     
     if (! anyoneCanPay) {
         off += BRVarIntSet((data ? &data[off] : NULL), (off <= dataLen ? dataLen - off : 0), tx->inCount);
@@ -337,7 +341,7 @@ BRTransaction *BRTransactionNew(void)
 
 // buf must contain a serialized tx
 // retruns a transaction that must be freed by calling BRTransactionFree()
-BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
+static BRTransaction *_BRTransactionParse(const uint8_t *buf, size_t bufLen, uint32_t flags)
 {
     assert(buf != NULL || bufLen == 0);
     if (! buf) return NULL;
@@ -352,7 +356,8 @@ BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
     off += sizeof(uint32_t);
 
     /* Peercoin messed with transaction protocol, walk past the the 32bit ntime field */
-    off += sizeof(uint32_t);
+    if (!(flags & 0x1))
+	    off += sizeof(uint32_t);
 
     tx->inCount = (size_t)BRVarInt(&buf[off], (off <= bufLen ? bufLen - off : 0), &len);
     off += len;
@@ -405,6 +410,16 @@ BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
     else if (isSigned) BRSHA256_2(&tx->txHash, buf, off);
     
     return tx;
+}
+
+BRTransaction *BRTransactionParse(const uint8_t *buf, size_t bufLen)
+{
+    return _BRTransactionParse(buf, bufLen, 0);
+}
+
+BRTransaction *BRTransactionParseFlags(const uint8_t *buf, size_t bufLen, uint32_t flags)
+{
+    return _BRTransactionParse(buf, bufLen, flags);
 }
 
 // returns number of bytes written to buf, or total bufLen needed if buf is NULL
