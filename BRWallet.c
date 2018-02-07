@@ -409,11 +409,14 @@ size_t BRWalletUTXOs(BRWallet *wallet, BRUTXO *utxos, size_t utxosCount)
 size_t BRWalletTransactions(BRWallet *wallet, BRTransaction *transactions[], size_t txCount)
 {
     assert(wallet != NULL);
+    printf("%s\n", __func__);
     pthread_mutex_lock(&wallet->lock);
     if (! transactions || array_count(wallet->transactions) < txCount) txCount = array_count(wallet->transactions);
 
     for (size_t i = 0; transactions && i < txCount; i++) {
         transactions[i] = wallet->transactions[i];
+	printf("%s i %lu trans %lu %lu\n", __func__, i,
+	       transactions[i]->inCount, transactions[i]->outCount);
     }
     
     pthread_mutex_unlock(&wallet->lock);

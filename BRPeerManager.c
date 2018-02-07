@@ -304,7 +304,7 @@ static void _BRPeerManagerSyncStopped(BRPeerManager *manager)
 {
     manager->syncStartHeight = 0;
 
-    printf("%s downloadPeer %d\n", __func__, manager->downloadPeer);
+    printf("%s downloadPeer %p\n", __func__, manager->downloadPeer);
 
     if (manager->downloadPeer) {
         // don't cancel timeout if there's a pending tx publish callback
