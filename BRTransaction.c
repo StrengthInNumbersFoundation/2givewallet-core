@@ -257,6 +257,7 @@ static size_t _BRTransactionData(const BRTransaction *tx, uint8_t *data, size_t 
     BRTxInput input;
     int anyoneCanPay = (hashType & SIGHASH_ANYONECANPAY), sigHash = (hashType & 0x1f);
     size_t i, off = 0;
+    time_t now = time(NULL);
     
     if (hashType & SIGHASH_FORKID) return _BRTransactionWitnessData(tx, data, dataLen, index, hashType);
     if (anyoneCanPay && index >= tx->inCount) return 0;
@@ -265,6 +266,7 @@ static size_t _BRTransactionData(const BRTransaction *tx, uint8_t *data, size_t 
 
     // Add emtpy timestamp since peercoin messed with the protocol without versioning it.
     //UInt32SetLE(&data[off], 0);
+    if (data && off + sizeof(uint32_t) <= dataLen) UInt32SetLE(&data[off], (uint32_t)now); // tx version
     off += sizeof(uint32_t);
     
     if (! anyoneCanPay) {
@@ -356,8 +358,10 @@ static BRTransaction *_BRTransactionParse(const uint8_t *buf, size_t bufLen, uin
     off += sizeof(uint32_t);
 
     /* Peercoin messed with transaction protocol, walk past the the 32bit ntime field */
-    if (!(flags & 0x1))
+    if (1 || !(flags & 0x1)) {
+	    tx->ntime = (off + sizeof(uint32_t) <= bufLen) ? UInt32GetLE(&buf[off]) : 0;
 	    off += sizeof(uint32_t);
+    }
 
     tx->inCount = (size_t)BRVarInt(&buf[off], (off <= bufLen ? bufLen - off : 0), &len);
     off += len;
