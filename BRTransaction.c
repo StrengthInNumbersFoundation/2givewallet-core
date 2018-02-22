@@ -358,7 +358,8 @@ static BRTransaction *_BRTransactionParse(const uint8_t *buf, size_t bufLen, uin
     off += sizeof(uint32_t);
 
     /* Peercoin messed with transaction protocol, walk past the the 32bit ntime field */
-    if (1 || !(flags & 0x1)) {
+//    if (1 || !(flags & 0x1)) {
+    if (1) {
 	    tx->ntime = (off + sizeof(uint32_t) <= bufLen) ? UInt32GetLE(&buf[off]) : 0;
 	    off += sizeof(uint32_t);
     }
