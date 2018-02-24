@@ -936,8 +936,10 @@ static void _peerDisconnected(void *info, int error)
         txCallback[i](txInfo[i], txError);
     }
 
-    if (willSave && manager->savePeers) manager->savePeers(manager->info, 1, NULL, 0);
-    if (willSave && manager->syncStopped) manager->syncStopped(manager->info, error);
+    if (willSave && manager->savePeers && manager->downloadPeer)
+        manager->savePeers(manager->info, 1, NULL, 0);
+    if (willSave && manager->syncStopped && manager->downloadPeer)
+        manager->syncStopped(manager->info, error);
     if (willReconnect) BRPeerManagerConnect(manager); // try connecting to another peer
     if (manager->txStatusUpdate) manager->txStatusUpdate(manager->info);
 }
