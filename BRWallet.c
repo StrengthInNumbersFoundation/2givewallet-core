@@ -569,7 +569,8 @@ BRTransaction *BRWalletCreateTxForOutputs(BRWallet *wallet, const BRTxOutput out
 {
     BRTransaction *tx, *transaction = BRTransactionNew();
     uint64_t feeAmount, amount = 0, balance = 0, minAmount;
-    size_t i, j, cpfpSize = 0;
+    size_t i, j;
+    //size_t cpfpSize = 0;
     BRUTXO *o;
     BRAddress addr = BR_ADDRESS_NONE;
     
@@ -1137,7 +1138,8 @@ uint64_t BRWalletMaxOutputAmount(BRWallet *wallet)
     BRTransaction *tx;
     BRUTXO *o;
     uint64_t fee, amount = 0;
-    size_t i, txSize, cpfpSize = 0, inCount = 0;
+    size_t i, txSize, inCount = 0;
+    //size_t cpfpSize = 0;
 
     assert(wallet != NULL);
     pthread_mutex_lock(&wallet->lock);
