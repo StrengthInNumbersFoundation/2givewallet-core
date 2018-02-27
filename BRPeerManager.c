@@ -940,8 +940,10 @@ static void _peerDisconnected(void *info, int error)
         manager->savePeers(manager->info, 1, NULL, 0);
     if (willSave && manager->syncStopped && manager->downloadPeer)
         manager->syncStopped(manager->info, error);
-    if (willReconnect) BRPeerManagerConnect(manager); // try connecting to another peer
-    if (manager->txStatusUpdate) manager->txStatusUpdate(manager->info);
+    if (willReconnect)
+        BRPeerManagerConnect(manager); // try connecting to another peer
+    if (manager->txStatusUpdate && manager->downloadPeer)
+        manager->txStatusUpdate(manager->info);
 }
 
 static void _peerRelayedPeers(void *info, const BRPeer peers[], size_t peersCount)
@@ -1763,10 +1765,14 @@ void BRPeerManagerDisconnect(BRPeerManager *manager)
     pthread_mutex_lock(&manager->lock);
     peerCount = array_count(manager->connectedPeers);
     dnsThreadCount = manager->dnsThreadCount;
+    
+    ts.tv_sec = 0;
+    ts.tv_nsec = 100;
 
     for (size_t i = peerCount; i > 0; i--) {
         manager->connectFailureCount = MAX_CONNECT_FAILURES; // prevent futher automatic reconnect attempts
         BRPeerDisconnect(manager->connectedPeers[i - 1]);
+        nanosleep(&ts, NULL); // pthread_yield() isn't POSIX standard :(
     }
 
     pthread_mutex_unlock(&manager->lock);
